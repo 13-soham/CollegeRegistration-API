@@ -95,6 +95,38 @@ app.get("/profile", handleAuth , async (req, res)=>{
 });
 
 
+
+// updateProfile 
+app.patch("/update", handleAuth, async (req, res)=>{
+    try {
+        const oldStudent = req.student;
+        const allowUpdates = ["email", "subject"];
+        const isUpdateAllow = Object.keys(req.body).every((key)=> allowUpdates.includes(key));
+        if(!isUpdateAllow){
+            throw new Error("this field not allowed to be update");
+        }
+        const updateProfile = await Student.findByIdAndUpdate(
+            oldStudent._id,
+            req.body,
+            {
+                new : true,
+                runValidators : true
+            }
+        );
+
+        res.status(201).json({
+            message : "Student Update Complete",
+            profile : updateProfile
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message : err.message
+        });
+    }
+});
+
+
 connectDb()
     .then(() => {
         app.listen(port, () => {
